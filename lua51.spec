@@ -6,7 +6,7 @@ Summary:	A simple lightweight powerful embeddable programming language
 Summary(pl.UTF-8):	Prosty, lekki ale potężny, osadzalny język programowania
 Name:		lua51
 Version:	5.1.3
-Release:	2
+Release:	3
 License:	MIT
 Group:		Development/Languages
 Source0:	http://www.lua.org/ftp/lua-%{version}.tar.gz
@@ -15,6 +15,7 @@ Patch0:		%{name}-link.patch
 URL:		http://www.lua.org/
 %{?with_luastatic:BuildRequires:       dietlibc-devel}
 BuildRequires:	readline-devel
+BuildRequires:	sed >= 4.0
 Requires:	%{name}-libs = %{version}-%{release}
 Provides:	lua = %{version}
 Obsoletes:	lua < 4.0.1
@@ -84,7 +85,7 @@ Static Lua libraries.
 Biblioteki statyczne Lua.
 
 %package luastatic
-Summary:        Static Lua interpreter
+Summary:	Static Lua interpreter
 Summary(pl.UTF-8):	Statycznie skonsolidowany interpreter lua
 Group:		Development/Languages
 
@@ -97,6 +98,7 @@ Statycznie skonsolidowany interpreter lua.
 %prep
 %setup -q -n lua-%{version}
 %patch0 -p1
+sed -r -i 's|(#define LUA_ROOT.*)%{_prefix}/local/|\1%{_prefix}/|g' src/luaconf.h
 
 %build
 %if %{with luastatic}
