@@ -13,7 +13,7 @@ Source0:	http://www.lua.org/ftp/lua-%{version}.tar.gz
 # Source0-md5:	d0870f2de55d59c1c8419f36e8fac150
 Patch0:		%{name}-link.patch
 URL:		http://www.lua.org/
-%{?with_luastatic:BuildRequires:       dietlibc-devel}
+%{?with_luastatic:BuildRequires:       dietlibc-static}
 BuildRequires:	readline-devel
 BuildRequires:	sed >= 4.0
 Requires:	%{name}-libs = %{version}-%{release}
@@ -105,8 +105,8 @@ sed -r -i 's|(#define LUA_CDIR.*)lib/|\1%{_lib}/|g' src/luaconf.h
 %if %{with luastatic}
 %{__make} all \
 	PLAT=posix \
-	CC="%{_target_cpu}-dietlibc-gcc" \
-	CFLAGS="%{rpmcflags} -Wall -fPIC -DPIC -D_GNU_SOURCE -DLUA_USE_POSIX"
+	CC="diet %{__cc}" \
+	CFLAGS="%{rpmcflags} -Wall -fPIC -Os -DPIC -D_GNU_SOURCE -DLUA_USE_POSIX"
 mv src/lua lua.static
 mv src/luac luac.static
 %{__make} clean
