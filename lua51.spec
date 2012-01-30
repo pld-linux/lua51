@@ -6,7 +6,7 @@ Summary:	A simple lightweight powerful embeddable programming language
 Summary(pl.UTF-8):	Prosty, lekki ale potężny, osadzalny język programowania
 Name:		lua51
 Version:	5.1.4
-Release:	2
+Release:	3
 License:	MIT
 Group:		Development/Languages
 Source0:	http://www.lua.org/ftp/lua-%{version}.tar.gz
@@ -48,7 +48,7 @@ Ta wersja ma wkompilowaną obsługę ładowania dynamicznych bibliotek.
 %package libs
 Summary:	lua 5.1.x libraries
 Summary(pl.UTF-8):	Biblioteki lua 5.1.x
-Group:		Development/Languages
+Group:		Libraries
 
 %description libs
 lua 5.1.x libraries.
