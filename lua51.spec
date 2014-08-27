@@ -22,12 +22,6 @@ BuildRequires:	sed >= 4.0
 Requires:	%{name}-libs = %{version}-%{release}
 Provides:	lua = %{version}
 Obsoletes:	lua < 4.0.1
-# Provide old SONAME to avoid rebuilds
-%ifarch %{x8664}
-Provides:	liblua.so.5.1()(64bit)
-%else
-Provides:	liblua.so.5.1
-%endif
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -58,6 +52,12 @@ Ta wersja ma wkompilowaną obsługę ładowania dynamicznych bibliotek.
 Summary:	lua 5.1.x libraries
 Summary(pl.UTF-8):	Biblioteki lua 5.1.x
 Group:		Libraries
+# Provide old SONAME to avoid rebuilds
+%ifarch %{x8664}
+Provides:	liblua.so.5.1()(64bit)
+%else
+Provides:	liblua.so.5.1
+%endif
 
 %description libs
 lua 5.1.x libraries.
@@ -210,7 +210,7 @@ rm -rf $RPM_BUILD_ROOT
 %post   libs-c++ -p /sbin/ldconfig
 %postun libs-c++ -p /sbin/ldconfig
 
-%triggerpostun -- %{name} < 5.1.5-1.2
+%triggerpostun libs -- %{name}-libs < 5.1.5-1.2
 # restore symlink which ldconfig removed (it was ghost of old package)
 ln -s liblua5.1.so.0 %{_libdir}/liblua.so.5.1 || :
 
