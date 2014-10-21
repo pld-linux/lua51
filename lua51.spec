@@ -17,6 +17,7 @@ Patch0:		%{name}-link.patch
 Patch1:		debian_make.patch
 URL:		http://www.lua.org/
 %{?with_luastatic:BuildRequires:       dietlibc-static}
+BuildRequires:	libstdc++-devel
 BuildRequires:	readline-devel
 BuildRequires:	sed >= 4.0
 Requires:	%{name}-libs = %{version}-%{release}
@@ -49,8 +50,8 @@ konfiguracji, skryptów i szybkich prototypów.
 Ta wersja ma wkompilowaną obsługę ładowania dynamicznych bibliotek.
 
 %package libs
-Summary:	lua 5.1.x libraries
-Summary(pl.UTF-8):	Biblioteki lua 5.1.x
+Summary:	Lua 5.1.x shared library
+Summary(pl.UTF-8):	Biblioteka współdzielona Lua 5.1.x
 Group:		Libraries
 # Provide old SONAME to avoid rebuilds
 %ifarch %{x8664}
@@ -60,28 +61,16 @@ Provides:	liblua.so.5.1
 %endif
 
 %description libs
-lua 5.1.x libraries.
+Lua 5.1.x shared library.
 
 %description libs -l pl.UTF-8
-Biblioteki lua 5.1.x.
-
-%package libs-c++
-Summary:	lua 5.1.x libraries
-Summary(pl.UTF-8):	Biblioteki lua 5.1.x
-Group:		Libraries
-
-%description libs-c++
-lua 5.1.x C++ libraries.
-
-%description libs-c++ -l pl.UTF-8
-Biblioteki lua 5.1.x C++.
+Biblioteka współdzielona Lua 5.1.x.
 
 %package devel
 Summary:	Header files for Lua
 Summary(pl.UTF-8):	Pliki nagłówkowe dla Lua
 Group:		Development/Languages
 Requires:	%{name}-libs = %{version}-%{release}
-Requires:	%{name}-libs-c++ = %{version}-%{release}
 Provides:	lua-devel = %{version}
 
 %description devel
@@ -104,6 +93,45 @@ Static Lua libraries.
 
 %description static -l pl.UTF-8
 Biblioteki statyczne Lua.
+
+%package c++-libs
+Summary:	Lua 5.1.x shared library with C++ exceptions support
+Summary(pl.UTF-8):	Biblioteka współdzielona Lua 5.1.x z obsługą wyjątków C++
+Group:		Libraries
+Requires:	%{name}-libs = %{version}-%{release}
+Obsoletes:	lua-libs-c++
+
+%description c++-libs
+Lua 5.1.x shared library with C++ exceptions support.
+
+%description c++-libs -l pl.UTF-8
+Biblioteka współdzielona Lua 5.1.x z obsługą wyjątków C++.
+
+%package c++-devel
+Summary:	Development files for Lua 5.1.x C++ library
+Summary(pl.UTF-8):	Pliki programistyczne biblioteki C++ Lua 5.1.x
+Group:		Development/Libraries
+Requires:	%{name}-c++-libs = %{version}-%{release}
+Requires:	%{name}-devel = %{version}-%{release}
+Requires:	libstdc++-devel
+
+%description c++-devel
+Development files for Lua 5.1.x C++ library.
+
+%description c++-devel -l pl.UTF-8
+Pliki programistyczne biblioteki C++ Lua 5.1.x.
+
+%package c++-static
+Summary:	Static Lua 5.1.x C++ library
+Summary(pl.UTF-8):	Statyczna biblioteka C++ Lua 5.1.x
+Group:		Development/Libraries
+Requires:	%{name}-c++-devel = %{version}-%{release}
+
+%description c++-static
+Static Lua 5.1.x C++ library.
+
+%description c++-static -l pl.UTF-8
+Statyczna biblioteka C++ Lua 5.1.x.
 
 %package luastatic
 Summary:	Static Lua interpreter
@@ -173,28 +201,28 @@ ln -s liblua5.1.so.0 $RPM_BUILD_ROOT%{_libdir}/liblua.so.5.1
 %{__rm} $RPM_BUILD_ROOT%{_libdir}/liblua5.1-c++.la
 
 # create pkgconfig files
-cat > $RPM_BUILD_ROOT%{_pkgconfigdir}/lua5.1.pc <<'EOF'
+cat > $RPM_BUILD_ROOT%{_pkgconfigdir}/lua5.1.pc <<EOF
 major_version=5.1
 version=%{version}
-lib_name_include=lua5.1
 
 prefix=%{_prefix}
 exec_prefix=%{_exec_prefix}
 libdir=%{_libdir}
+includedir=%{_includedir}/lua51
 interpreter=%{_bindir}/lua5.1
 compiler=%{_bindir}/luac5.1
 
 $(cat lua.pc.in)
 EOF
 
-cat > $RPM_BUILD_ROOT%{_pkgconfigdir}/lua5.1-c++.pc <<'EOF'
+cat > $RPM_BUILD_ROOT%{_pkgconfigdir}/lua5.1-c++.pc <<EOF
 major_version=5.1
 version=%{version}
-lib_name_include=lua5.1
 
 prefix=%{_prefix}
 exec_prefix=%{_exec_prefix}
 libdir=%{_libdir}
+includedir=%{_includedir}/lua51
 interpreter=%{_bindir}/lua5.1
 compiler=%{_bindir}/luac5.1
 
@@ -207,8 +235,8 @@ rm -rf $RPM_BUILD_ROOT
 %post   libs -p /sbin/ldconfig
 %postun libs -p /sbin/ldconfig
 
-%post   libs-c++ -p /sbin/ldconfig
-%postun libs-c++ -p /sbin/ldconfig
+%post   c++-libs -p /sbin/ldconfig
+%postun c++-libs -p /sbin/ldconfig
 
 %triggerpostun libs -- %{name}-libs < 5.1.5-1.2
 # restore symlink which ldconfig removed (it was ghost of old package)
@@ -224,39 +252,49 @@ ln -s liblua5.1.so.0 %{_libdir}/liblua.so.5.1 || :
 %files libs
 %defattr(644,root,root,755)
 %doc COPYRIGHT HISTORY README
-%attr(755,root,root) %{_libdir}/liblua.so.5.1
 %attr(755,root,root) %{_libdir}/liblua5.1.so.*.*.*
-%ghost %{_libdir}/liblua5.1.so.0
+%attr(755,root,root) %ghost %{_libdir}/liblua5.1.so.0
+# PLD/upstream compatibility symlink
+%attr(755,root,root) %{_libdir}/liblua.so.5.1
 %dir %{_libdir}/lua
 %{_libdir}/lua/5.1
 %dir %{_datadir}/lua
 %{_datadir}/lua/5.1
 
-%files libs-c++
-%defattr(644,root,root,755)
-%doc COPYRIGHT HISTORY README
-%attr(755,root,root) %{_libdir}/liblua5.1-c++.so.*.*.*
-%ghost %{_libdir}/liblua5.1-c++.so.0
-
 %files devel
 %defattr(644,root,root,755)
 %doc doc/*.{html,css,gif} test
-%{_libdir}/liblua5.1.so
-%{_libdir}/liblua5.1-c++.so
-%{_libdir}/liblua51.so
+%attr(755,root,root) %{_libdir}/liblua5.1.so
+# PLD backward compatibility symlink
+%attr(755,root,root) %{_libdir}/liblua51.so
 %{_includedir}/lua51
-%{_pkgconfigdir}/lua5.1-c++.pc
 %{_pkgconfigdir}/lua5.1.pc
+# PLD backward compatibility symlink
 %{_pkgconfigdir}/lua51.pc
 
 %files static
 %defattr(644,root,root,755)
 %{_libdir}/liblua5.1.a
+# PLD backward compatibility symlink
 %{_libdir}/liblua51.a
+
+%files c++-libs
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/liblua5.1-c++.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/liblua5.1-c++.so.0
+
+%files c++-devel
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/liblua5.1-c++.so
+%{_pkgconfigdir}/lua5.1-c++.pc
+
+%files c++-static
+%defattr(644,root,root,755)
 %{_libdir}/liblua5.1-c++.a
 
 %if %{with luastatic}
 %files luastatic
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/*.static
+%attr(755,root,root) %{_bindir}/lua.static
+%attr(755,root,root) %{_bindir}/luac.static
 %endif
