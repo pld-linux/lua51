@@ -6,7 +6,7 @@ Summary:	A simple lightweight powerful embeddable programming language
 Summary(pl.UTF-8):	Prosty, lekki ale potężny, osadzalny język programowania
 Name:		lua51
 Version:	5.1.5
-Release:	4
+Release:	5
 License:	MIT
 Group:		Development/Languages
 Source0:	http://www.lua.org/ftp/lua-%{version}.tar.gz
@@ -194,7 +194,7 @@ install -p luac.static $RPM_BUILD_ROOT%{_bindir}/luac51.static
 ln -s liblua5.1.so $RPM_BUILD_ROOT%{_libdir}/liblua51.so
 ln -s liblua5.1.a $RPM_BUILD_ROOT%{_libdir}/liblua51.a
 ln -s lua5.1.pc $RPM_BUILD_ROOT%{_pkgconfigdir}/lua51.pc
-ln -s liblua5.1.so.0 $RPM_BUILD_ROOT%{_libdir}/liblua.so.5.1
+ln -s liblua5.1.so.0.0.0 $RPM_BUILD_ROOT%{_libdir}/liblua.so.5.1
 
 # we have pkgconfig files, rm .la
 %{__rm} $RPM_BUILD_ROOT%{_libdir}/liblua5.1.la
@@ -240,7 +240,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %triggerpostun libs -- %{name}-libs < 5.1.5-1.2
 # restore symlink which ldconfig removed (it was ghost of old package)
-ln -s liblua5.1.so.0 %{_libdir}/liblua.so.5.1 || :
+ln -s liblua5.1.so.0.0.0 %{_libdir}/liblua.so.5.1 || :
 
 %files
 %defattr(644,root,root,755)
