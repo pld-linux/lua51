@@ -172,8 +172,10 @@ cp -p %{SOURCE1} %{SOURCE2} .
 	PLAT=posix \
 	CC="diet %{__cc}" \
 	CFLAGS="%{rpmcflags} -Wall -fPIC -Os -DPIC -D_GNU_SOURCE -DLUA_USE_POSIX"
-mv src/lua lua.static
-mv src/luac luac.static
+
+%{__mv} src/lua lua.static
+%{__mv} src/luac luac.static
+
 %{__make} clean
 %endif
 
@@ -246,15 +248,14 @@ EOF
 for f in lua luac ; do
 	ln -sf ${f}5.1 $RPM_BUILD_ROOT%{_bindir}/${f}
 	echo ".so ${f}5.1.1" >$RPM_BUILD_ROOT%{_mandir}/man1/${f}.1
+%if %{with luastatic}
+	ln -sf ${f}5.1.static $RPM_BUILD_ROOT%{_bindir}/${f}.static
+%endif
 done
 ln -sf liblua5.1.so $RPM_BUILD_ROOT%{_libdir}/liblua.so
 ln -sf liblua5.1.a $RPM_BUILD_ROOT%{_libdir}/liblua.a
 ln -sf lua5.1 $RPM_BUILD_ROOT%{_includedir}/lua
 ln -sf lua5.1.pc $RPM_BUILD_ROOT%{_pkgconfigdir}/lua.pc
-%if %{with luastatic}
-ln -sf lua5.1.static $RPM_BUILD_ROOT%{_bindir}/lua.static
-ln -sf luac5.1.static $RPM_BUILD_ROOT%{_bindir}/luac.static
-%endif
 %endif
 
 %clean
